@@ -1,0 +1,11 @@
+{
+    "configurations": [
+        {
+            "name": "backlight_control debug",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "backlight_control",
+            "args": ["3"]
+        }
+    ]
+}

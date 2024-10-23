@@ -1,0 +1,3 @@
+dbus-fast
+python-xlib
+types-python-xlib

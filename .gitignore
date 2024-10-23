@@ -1,0 +1,7 @@
+.venv
+.*_cache
+__pycache__
+*.egg-info
+build/
+dist/
+*.code-workspace
