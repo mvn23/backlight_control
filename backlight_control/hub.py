@@ -28,7 +28,7 @@ from .types import (
 )
 
 ACTIVITY_BACKEND = ActivityMonitorBackend.XLIB_XINPUT
-KEYBOARD_BACKLIGHT_BACKEND = KeyboardBacklightBackend.DBUS_UPOWER
+KEYBOARD_BACKLIGHT_BACKEND = KeyboardBacklightBackend.XBACKLIGHT
 LIGHT_SENSOR_BACKEND = LightSensorBackend.DBUS_SENSORPROXY
 
 _LOGGER = logging.getLogger(__name__)

@@ -9,6 +9,7 @@ class ActivityMonitorBackend(StrEnum):
 
 class KeyboardBacklightBackend(StrEnum):
     DBUS_UPOWER = "dbus_upower"
+    XBACKLIGHT = "xbacklight"
 
 
 class KeyboardBacklightOperatingMode(StrEnum):
