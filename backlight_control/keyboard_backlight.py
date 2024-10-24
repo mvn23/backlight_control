@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 
 from .types import (
     KeyboardBacklightBackend,
+    KeyboardBacklightOperatingMode,
     LightControlHubActivityUpdate,
     LightControlHubKeyboardBacklightUpdate,
     LightControlHubLightSensorUpdate,
@@ -15,29 +16,91 @@ from .types import (
 if TYPE_CHECKING:
     from .hub import LightControlHub
 
+CONF_KEYBOARD_MIN_BRIGHTNESS = "keyboard_min_brightness"
+CONF_LUX_FOR_KEYBOARD_OFF = "lux_for_keyboard_off"
+CONF_LUX_FOR_MAX_BRIGHTNESS = "lux_for_max_brightness"
+CONF_LUX_FOR_MIN_BRIGHTNESS = "lux_for_min_brightness"
+KEYBOARD_MIN_BRIGHTNESS = 10
+LUX_FOR_KEYBOARD_OFF = 400
+LUX_FOR_MAX_BRIGHTNESS = 300
+LUX_FOR_MIN_BRIGHTNESS = 10
+
 _LOGGER = logging.getLogger(__name__)
 
 
 class KeyboardBacklight(ABC):
+    config: dict
+    maximum: int
+
     @abstractmethod
     def __init__(self, hub: LightControlHub, config: dict) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def get_current(self) -> int:
+        raise NotImplementedError
+
+    async def on_idle_event(
+        self, update: LightControlHubActivityUpdate
+    ) -> LightControlHubKeyboardBacklightUpdate:
+        if update.is_idle:
+            await self.update_stored()
+            await self.set_absolute(0)
+            return LightControlHubKeyboardBacklightUpdate(
+                mode=KeyboardBacklightOperatingMode.IDLE_OFF
+            )
+        else:
+            if await self.get_current() == 0:
+                await self.set_absolute(self.stored)
+            return LightControlHubKeyboardBacklightUpdate(
+                mode=KeyboardBacklightOperatingMode.ACTIVE_ON
+            )
+
+    async def on_lighting_event(
+        self, update: LightControlHubLightSensorUpdate
+    ) -> LightControlHubKeyboardBacklightUpdate:
+        if update.value >= self.config[CONF_LUX_FOR_KEYBOARD_OFF]:
+            await self.set_absolute(0)
+            return LightControlHubKeyboardBacklightUpdate(
+                mode=KeyboardBacklightOperatingMode.ACTIVE_OFF
+            )
+
+        if update.value <= self.config[CONF_LUX_FOR_MIN_BRIGHTNESS]:
+            target_brightness = self.config[CONF_KEYBOARD_MIN_BRIGHTNESS]
+        elif update.value >= self.config[CONF_LUX_FOR_MAX_BRIGHTNESS]:
+            target_brightness = self.maximum
+        else:
+            target_brightness = int(
+                self.config[CONF_KEYBOARD_MIN_BRIGHTNESS]
+                + (
+                    (update.value - self.config[CONF_LUX_FOR_MIN_BRIGHTNESS])
+                    / (
+                        self.config[CONF_LUX_FOR_MAX_BRIGHTNESS]
+                        - self.config[CONF_LUX_FOR_MIN_BRIGHTNESS]
+                    )
+                )
+                * (self.maximum - self.config[CONF_KEYBOARD_MIN_BRIGHTNESS])
+            )
+
+        _LOGGER.debug("Target keyboard brightness: %d", target_brightness)
+
+        await self.set_absolute(target_brightness)
+        return LightControlHubKeyboardBacklightUpdate(
+            mode=KeyboardBacklightOperatingMode.ACTIVE_ON
+        )
+
+    @abstractmethod
+    async def set_absolute(self, value: int) -> None:
         raise NotImplementedError
 
     @abstractmethod
     async def start(self) -> None:
         raise NotImplementedError
 
-    @abstractmethod
-    async def on_idle_event(
-        self, update: LightControlHubActivityUpdate
-    ) -> LightControlHubKeyboardBacklightUpdate:
-        raise NotImplementedError
-
-    @abstractmethod
-    async def on_lighting_event(
-        self, update: LightControlHubLightSensorUpdate
-    ) -> LightControlHubKeyboardBacklightUpdate:
-        raise NotImplementedError
+    async def update_stored(self) -> int:
+        self.stored = await self.get_current()
+        _LOGGER.debug("Stored brightness: %d", self.stored)
+        return self.stored
 
 
 def get_and_verify_keyboard_backlight_plugin(

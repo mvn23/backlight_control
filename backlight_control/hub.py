@@ -1,8 +1,22 @@
 import asyncio
 import logging
 
-from .activity_monitor import get_and_verify_activity_plugin
-from .keyboard_backlight import get_and_verify_keyboard_backlight_plugin
+from .activity_monitor import (
+    CONF_IDLE_DELAY,
+    IDLE_DELAY,
+    get_and_verify_activity_plugin,
+)
+from .keyboard_backlight import (
+    CONF_KEYBOARD_MIN_BRIGHTNESS,
+    CONF_LUX_FOR_KEYBOARD_OFF,
+    CONF_LUX_FOR_MAX_BRIGHTNESS,
+    CONF_LUX_FOR_MIN_BRIGHTNESS,
+    KEYBOARD_MIN_BRIGHTNESS,
+    LUX_FOR_KEYBOARD_OFF,
+    LUX_FOR_MAX_BRIGHTNESS,
+    LUX_FOR_MIN_BRIGHTNESS,
+    get_and_verify_keyboard_backlight_plugin,
+)
 from .light_sensor import get_and_verify_light_sensor_plugin
 from .types import (
     ActivityMonitorBackend,
@@ -13,24 +27,11 @@ from .types import (
     LightSensorBackend,
 )
 
-_LOGGER = logging.getLogger(__name__)
-
-IDLE_DELAY = 30
-KEYBOARD_MIN_BRIGHTNESS = 10
-LUX_FOR_KEYBOARD_OFF = 400
-LUX_FOR_MAX_BRIGHTNESS = 300
-LUX_FOR_MIN_BRIGHTNESS = 10
-
-CONF_IDLE_DELAY = "idle_delay"
-CONF_KEYBOARD_MIN_BRIGHTNESS = "keyboard_min_brightness"
-CONF_LUX_FOR_KEYBOARD_OFF = "lux_for_keyboard_off"
-CONF_LUX_FOR_MAX_BRIGHTNESS = "lux_for_max_brightness"
-CONF_LUX_FOR_MIN_BRIGHTNESS = "lux_for_min_brightness"
-
-
 ACTIVITY_BACKEND = ActivityMonitorBackend.XLIB_XINPUT
 KEYBOARD_BACKLIGHT_BACKEND = KeyboardBacklightBackend.DBUS_UPOWER
 LIGHT_SENSOR_BACKEND = LightSensorBackend.DBUS_SENSORPROXY
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class LightControlHub:

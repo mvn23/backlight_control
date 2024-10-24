@@ -11,7 +11,6 @@ from Xlib.ext import xinput
 
 from ...activity_monitor import ActivityMonitor
 from ...hub import CONF_IDLE_DELAY
-from ...types import LightControlHubActivityUpdate
 
 if TYPE_CHECKING:
     from Xlib.xobject.drawable import Window
@@ -63,16 +62,6 @@ class XlibXinputActivityMonitor(ActivityMonitor):
 
         loop = asyncio.get_running_loop()
         self._worker = loop.create_task(self.monitor(loop, root))
-
-    async def trigger_idle(self) -> None:
-        _LOGGER.debug("Entering idle state")
-        self._is_idle = True
-        await self._hub.activity_update(LightControlHubActivityUpdate(is_idle=True))
-
-    async def end_idle(self) -> None:
-        _LOGGER.debug("Leaving idle state")
-        self._is_idle = False
-        await self._hub.activity_update(LightControlHubActivityUpdate(is_idle=False))
 
     async def monitor(self, loop: asyncio.AbstractEventLoop, root: Window) -> None:
         while True:

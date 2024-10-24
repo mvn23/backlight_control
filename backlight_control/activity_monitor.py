@@ -5,22 +5,35 @@ from importlib import import_module
 import logging
 from typing import TYPE_CHECKING
 
-from .types import ActivityMonitorBackend
+from .types import ActivityMonitorBackend, LightControlHubActivityUpdate
 
 if TYPE_CHECKING:
     from .hub import LightControlHub
+
+CONF_IDLE_DELAY = "idle_delay"
+IDLE_DELAY = 30
 
 _LOGGER = logging.getLogger(__name__)
 
 
 class ActivityMonitor(ABC):
+    _hub: LightControlHub
+
     @abstractmethod
     def __init__(self, hub: LightControlHub, config: dict):
         raise NotImplementedError
 
+    async def end_idle(self) -> None:
+        self._is_idle = False
+        await self._hub.activity_update(LightControlHubActivityUpdate(is_idle=False))
+
     @abstractmethod
     async def start(self) -> None:
         raise NotImplementedError
+
+    async def trigger_idle(self) -> None:
+        self._is_idle = True
+        await self._hub.activity_update(LightControlHubActivityUpdate(is_idle=True))
 
 
 class _DummyActivityMonitor(ActivityMonitor):
