@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
+from abc import ABC, abstractmethod, abstractproperty
 from importlib import import_module
 import logging
 from typing import TYPE_CHECKING
@@ -18,9 +18,14 @@ _LOGGER = logging.getLogger(__name__)
 
 class ActivityMonitor(ABC):
     _hub: LightControlHub
+    _is_idle: bool = False
 
     @abstractmethod
     def __init__(self, hub: LightControlHub, config: dict):
+        raise NotImplementedError
+
+    @abstractproperty
+    def config(self) -> dict:
         raise NotImplementedError
 
     async def end_idle(self) -> None:
@@ -39,6 +44,10 @@ class ActivityMonitor(ABC):
 class _DummyActivityMonitor(ActivityMonitor):
     def __init__(self, hub: LightControlHub, config: dict):
         pass
+
+    @property
+    def config(self) -> dict:
+        return {}
 
     async def start(self) -> None:
         pass

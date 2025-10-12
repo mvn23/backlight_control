@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
+from abc import ABC, abstractmethod, abstractproperty
 from importlib import import_module
 import logging
 from typing import TYPE_CHECKING
@@ -29,15 +29,24 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class KeyboardBacklight(ABC):
-    config: dict
-    maximum: int
+
+    stored: int = 0
+    _config: dict
 
     @abstractmethod
     def __init__(self, hub: LightControlHub, config: dict) -> None:
         raise NotImplementedError
 
+    @property
+    def config(self) -> dict:
+        return self._config
+
     @abstractmethod
     async def get_current(self) -> int:
+        raise NotImplementedError
+
+    @abstractproperty
+    def maximum(self) -> int:
         raise NotImplementedError
 
     async def on_idle_event(
