@@ -9,8 +9,7 @@ from typing import TYPE_CHECKING
 from Xlib.display import Display
 from Xlib.ext import xinput
 
-from ...activity_monitor import ActivityMonitor
-from ...hub import CONF_IDLE_DELAY
+from ...activity_monitor import CONF_IDLE_DELAY, IDLE_DELAY, ActivityMonitor
 
 if TYPE_CHECKING:
     from Xlib.xobject.drawable import Window
@@ -21,20 +20,25 @@ _LOGGER = logging.getLogger(__name__)
 
 
 def get_plugin(hub: LightControlHub, config: dict):
-    return XlibXinputActivityMonitor(hub, config[CONF_IDLE_DELAY])
+    if CONF_IDLE_DELAY not in config:
+        config[CONF_IDLE_DELAY] = IDLE_DELAY
+    return XlibXinputActivityMonitor(hub, config)
 
 
 class XlibXinputActivityMonitor(ActivityMonitor):
     _countdown: asyncio.Task
     _event_trigger: asyncio.Task
     _worker: asyncio.Task
+    _root: Window
 
-    def __init__(self, hub: LightControlHub, delay: int) -> None:
+    def __init__(self, hub: LightControlHub, config: dict) -> None:
         self._hub: LightControlHub = hub
-        self.delay: int = delay
-        self.display: Display = Display()
-        self._is_idle: bool = False
+        self._config: dict = config
         self._tpe: ThreadPoolExecutor = ThreadPoolExecutor(max_workers=1)
+
+    @property
+    def config(self) -> dict:
+        return self._config
 
     async def start(self) -> None:
         display = Display()
@@ -46,8 +50,8 @@ class XlibXinputActivityMonitor(ActivityMonitor):
             version_info.minor_version,
         )
 
-        root = display.screen().root
-        root.xinput_select_events(
+        self._root = display.screen().root
+        self._root.xinput_select_events(
             [
                 (
                     xinput.AllDevices,
@@ -60,10 +64,15 @@ class XlibXinputActivityMonitor(ActivityMonitor):
             ]
         )
 
-        loop = asyncio.get_running_loop()
-        self._worker = loop.create_task(self.monitor(loop, root))
+        def dc(fut):
+            fut.result()
 
-    async def monitor(self, loop: asyncio.AbstractEventLoop, root: Window) -> None:
+        loop = asyncio.get_running_loop()
+        self._worker = loop.create_task(self.monitor(self._root))
+        self._worker.add_done_callback(dc)
+
+    async def monitor(self, root: Window) -> None:
+        loop = asyncio.get_running_loop()
         while True:
             if self._is_idle:
                 await self.end_idle()
@@ -76,5 +85,5 @@ class XlibXinputActivityMonitor(ActivityMonitor):
                 await self._countdown
 
     async def _start_countdown(self) -> None:
-        await asyncio.sleep(self.delay)
+        await asyncio.sleep(self._config[CONF_IDLE_DELAY])
         await self.trigger_idle()
