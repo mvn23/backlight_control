@@ -26,26 +26,34 @@ def get_plugin(hub: LightControlHub, config: dict):
 
 class DBusUPowerKeyboardBacklight(KeyboardBacklight):
     def __init__(self, hub: LightControlHub, config: dict) -> None:
-        self.config = config
-        self.maximum: int = 1
+        self._config = config
+        self._maximum: int = 1
         self.stored: int = 1
         self._hub: LightControlHub = hub
         self._bus: MessageBus | None = None
         self._kbd_backlight: ProxyInterface | None = None
+
+    @property
+    def config(self) -> dict:
+        return self._config
 
     async def get_current(self) -> int:
         if not self._kbd_backlight:
             raise RuntimeError("Not connected to DBus. Call start() first.")
         return int(await self._kbd_backlight.call_get_brightness())  # type: ignore[attr-defined]
 
+    @property
+    def maximum(self) -> int:
+        return self._maximum
+
     async def set_absolute(self, value: int) -> None:
         if not self._kbd_backlight:
             raise RuntimeError("Not connected to DBus. Call start() first.")
-        if 0 <= value <= self.maximum:
+        if 0 <= value <= self._maximum:
             await self._kbd_backlight.call_set_brightness(value)  # type: ignore[attr-defined]
 
     async def start(self) -> None:
-        self.bus = await MessageBus(bus_type=BusType.SYSTEM).connect()
+        self._bus = await MessageBus(bus_type=BusType.SYSTEM).connect()
 
         with open(
             os.path.join(
@@ -54,7 +62,7 @@ class DBusUPowerKeyboardBacklight(KeyboardBacklight):
         ) as f:
             node_introspection = f.read()
 
-        kbd_backlight_proxy = self.bus.get_proxy_object(
+        kbd_backlight_proxy = self._bus.get_proxy_object(
             "org.freedesktop.UPower",
             "/org/freedesktop/UPower/KbdBacklight",
             Node.parse(node_introspection),
@@ -62,5 +70,5 @@ class DBusUPowerKeyboardBacklight(KeyboardBacklight):
         self._kbd_backlight = kbd_backlight_proxy.get_interface(
             "org.freedesktop.UPower.KbdBacklight",
         )
-        self.maximum = await self._kbd_backlight.call_get_max_brightness()  # type: ignore[attr-defined]
+        self._maximum = await self._kbd_backlight.call_get_max_brightness()  # type: ignore[attr-defined]
         self.stored = await self._kbd_backlight.call_get_brightness()  # type: ignore[attr-defined]
