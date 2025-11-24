@@ -1,3 +1,6 @@
 dbus-fast
+pytest-asyncio
+pytest-cov
+python-wayland
 python-xlib
 types-python-xlib
