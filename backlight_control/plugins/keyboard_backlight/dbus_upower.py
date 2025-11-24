@@ -33,10 +33,6 @@ class DBusUPowerKeyboardBacklight(KeyboardBacklight):
         self._bus: MessageBus | None = None
         self._kbd_backlight: ProxyInterface | None = None
 
-    @property
-    def config(self) -> dict:
-        return self._config
-
     async def get_current(self) -> int:
         if not self._kbd_backlight:
             raise RuntimeError("Not connected to DBus. Call start() first.")

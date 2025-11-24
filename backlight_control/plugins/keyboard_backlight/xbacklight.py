@@ -30,10 +30,6 @@ class XBacklightKeyboardBacklight(KeyboardBacklight):
         self.stored: int = 1
         self._hub: LightControlHub = hub
 
-    @property
-    def config(self) -> dict:
-        return self._config
-
     async def get_current(self) -> int:
         proc = await asyncio.create_subprocess_exec(
             "xbacklight",

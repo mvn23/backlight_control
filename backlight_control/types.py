@@ -3,6 +3,7 @@ from enum import StrEnum
 
 
 class ActivityMonitorBackend(StrEnum):
+    WAYLAND = "wayland"
     XLIB_XINPUT = "xlib_xinput"
     XLIB_XSS_XINPUT_MIXED = "xlib_xss_xinput_mixed"
 

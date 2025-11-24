@@ -8,10 +8,10 @@ from .hub import LightControlHub
 
 async def main_coro():
     logging.basicConfig(level=logging.DEBUG)
+    # logging.basicConfig(level=logging.INFO)
     mon = LightControlHub(int(sys.argv[1]) if len(sys.argv) == 2 else 30)
     with suppress(asyncio.CancelledError):
         await mon.start()
-
 
 def main():
     asyncio.run(main_coro())

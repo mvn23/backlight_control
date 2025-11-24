@@ -27,7 +27,7 @@ from .types import (
     LightSensorBackend,
 )
 
-ACTIVITY_BACKEND = ActivityMonitorBackend.XLIB_XINPUT
+ACTIVITY_BACKEND = ActivityMonitorBackend.WAYLAND
 KEYBOARD_BACKLIGHT_BACKEND = KeyboardBacklightBackend.XBACKLIGHT
 LIGHT_SENSOR_BACKEND = LightSensorBackend.DBUS_SENSORPROXY
 
