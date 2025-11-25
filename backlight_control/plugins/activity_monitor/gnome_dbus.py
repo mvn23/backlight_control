@@ -9,7 +9,7 @@ from dbus_fast import BusType
 from dbus_fast.aio import MessageBus
 from dbus_fast.introspection import Node
 
-from ...activity_monitor import CONF_IDLE_DELAY, IDLE_DELAY, ActivityMonitor
+from ...activity_monitor import CONF_IDLE_DELAY, ActivityMonitor
 
 if TYPE_CHECKING:
     from ...hub import LightControlHub
@@ -20,8 +20,6 @@ _MODULE_DIR = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file_
 
 
 def get_plugin(hub: LightControlHub, config: dict) -> ActivityMonitor:
-    if CONF_IDLE_DELAY not in config:
-        config[CONF_IDLE_DELAY] = IDLE_DELAY
     return GnomeDBusActivityMonitor(hub, config)
 
 

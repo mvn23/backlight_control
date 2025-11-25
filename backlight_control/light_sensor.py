@@ -51,6 +51,8 @@ def get_and_verify_light_sensor_plugin(
     hub: LightControlHub,
     config: dict,
 ) -> LightSensor:
+    if backend == LightSensorBackend.NONE:
+        return _DummyLightSensor(hub, {})
     try:
         module = import_module(
             f".{backend.value}", "backlight_control.plugins.light_sensor"

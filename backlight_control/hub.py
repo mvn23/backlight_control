@@ -1,25 +1,12 @@
 import asyncio
 import logging
 
-from .activity_monitor import (
-    CONF_IDLE_DELAY,
-    IDLE_DELAY,
-    get_and_verify_activity_plugin,
-)
-from .keyboard_backlight import (
-    CONF_KEYBOARD_MIN_BRIGHTNESS,
-    CONF_LUX_FOR_KEYBOARD_OFF,
-    CONF_LUX_FOR_MAX_BRIGHTNESS,
-    CONF_LUX_FOR_MIN_BRIGHTNESS,
-    KEYBOARD_MIN_BRIGHTNESS,
-    LUX_FOR_KEYBOARD_OFF,
-    LUX_FOR_MAX_BRIGHTNESS,
-    LUX_FOR_MIN_BRIGHTNESS,
-    get_and_verify_keyboard_backlight_plugin,
-)
+from .activity_monitor import get_and_verify_activity_plugin
+from .keyboard_backlight import get_and_verify_keyboard_backlight_plugin
 from .light_sensor import get_and_verify_light_sensor_plugin
 from .types import (
     ActivityMonitorBackend,
+    ConfigError,
     KeyboardBacklightBackend,
     KeyboardBacklightOperatingMode,
     LightControlHubActivityUpdate,
@@ -27,9 +14,10 @@ from .types import (
     LightSensorBackend,
 )
 
-ACTIVITY_BACKEND = ActivityMonitorBackend.WLROOTS
-KEYBOARD_BACKLIGHT_BACKEND = KeyboardBacklightBackend.XBACKLIGHT
-LIGHT_SENSOR_BACKEND = LightSensorBackend.DBUS_SENSORPROXY
+CONF_ACTIVITY_MONITOR = "activity_monitor"
+CONF_KEYBOARD_BACKLIGHT = "keyboard_backlight"
+CONF_LIGHT_SENSOR = "light_sensor"
+CONF_TYPE = "type"
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -38,26 +26,10 @@ class LightControlHub:
     def __init__(self, config) -> None:
         self.stopping = asyncio.Event()
 
-        self._activity_monitor = get_and_verify_activity_plugin(
-            ACTIVITY_BACKEND,
-            self,
-            {CONF_IDLE_DELAY: IDLE_DELAY},
-        )
-        self._keyboard_backlight = get_and_verify_keyboard_backlight_plugin(
-            KEYBOARD_BACKLIGHT_BACKEND,
-            self,
-            {
-                CONF_KEYBOARD_MIN_BRIGHTNESS: KEYBOARD_MIN_BRIGHTNESS,
-                CONF_LUX_FOR_KEYBOARD_OFF: LUX_FOR_KEYBOARD_OFF,
-                CONF_LUX_FOR_MAX_BRIGHTNESS: LUX_FOR_MAX_BRIGHTNESS,
-                CONF_LUX_FOR_MIN_BRIGHTNESS: LUX_FOR_MIN_BRIGHTNESS,
-            },
-        )
-        self._light_sensor = get_and_verify_light_sensor_plugin(
-            LIGHT_SENSOR_BACKEND,
-            self,
-            {},
-        )
+        self._activity_monitor = get_activity_monitor_plugin_from_config(self, config)
+        self._keyboard_backlight = get_keyboard_backlight_plugin_from_config(
+            self, config)
+        self._light_sensor = get_light_sensor_plugin_from_config(self, config)
 
     async def start(self) -> None:
         async with asyncio.TaskGroup() as tg:
@@ -84,3 +56,59 @@ class LightControlHub:
     ) -> None:
         _LOGGER.debug("Got light sensor update: %s", update)
         await self._keyboard_backlight.on_lighting_event(update)
+
+
+def get_activity_monitor_plugin_from_config(
+    hub: LightControlHub, config) -> ActivityMonitorBackend:
+    """Return ActivityMonitorBackend from config."""
+    try:
+        plugin = ActivityMonitorBackend(config[CONF_ACTIVITY_MONITOR][CONF_TYPE])
+    except ValueError as e:
+        raise ConfigError("No valid activity_monitor plugin defined in config.") from e
+
+    _LOGGER.debug(f"Using activity_monitor plugin {plugin.value}")
+    return get_and_verify_activity_plugin(
+        plugin,
+        hub,
+        config[CONF_ACTIVITY_MONITOR],
+    )
+    
+
+def get_keyboard_backlight_plugin_from_config(
+    hub: LightControlHub, config) -> KeyboardBacklightBackend:
+    """Return KeyboardBacklightBackend from config."""
+    try:
+        plugin = KeyboardBacklightBackend(config[CONF_KEYBOARD_BACKLIGHT][CONF_TYPE])
+    except ValueError as e:
+        raise ConfigError(
+            "No valid keyboard_backlight plugin defined in config.") from e
+
+    _LOGGER.debug(f"Using keyboard_backlight plugin {plugin.value}")
+    return get_and_verify_keyboard_backlight_plugin(
+        plugin,
+        hub,
+        config[CONF_KEYBOARD_BACKLIGHT],
+    )
+
+
+def get_light_sensor_plugin_from_config(
+    hub: LightControlHub, config) -> LightSensorBackend:
+    """Return LightSensorBackend from config."""
+    if config.get(CONF_LIGHT_SENSOR) is None:
+        _LOGGER.info("No light sensor defined in config, falling back to none.")
+        return get_and_verify_light_sensor_plugin(
+            LightSensorBackend.NONE,
+            hub,
+            {}
+        )
+    try:
+        plugin = LightSensorBackend(config[CONF_LIGHT_SENSOR][CONF_TYPE])
+    except ValueError as e:
+        raise ConfigError("No valid light_sensor plugin defined in config.") from e
+
+    _LOGGER.debug(f"Using light_sensor plugin {plugin.value}")
+    return get_and_verify_light_sensor_plugin(
+        plugin,
+        hub,
+        config[CONF_LIGHT_SENSOR],
+    )

@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from .hub import LightControlHub
 
 CONF_IDLE_DELAY = "idle_delay"
-IDLE_DELAY = 30
+DEFAULT_IDLE_DELAY = 30
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -66,6 +66,7 @@ def get_and_verify_activity_plugin(
         _LOGGER.error("Failed to import activity monitor %s: %s", backend.value, e)
         return _DummyActivityMonitor(hub, {})
 
+    config[CONF_IDLE_DELAY] = config.get(CONF_IDLE_DELAY, DEFAULT_IDLE_DELAY)
     try:
         instance = module.get_plugin(hub, config)
     except AttributeError:

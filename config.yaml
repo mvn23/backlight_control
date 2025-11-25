@@ -1,0 +1,57 @@
+# Define the overall log level. Defaults to INFO.
+log_level: DEBUG
+
+# Configure the activity monitor. This section is mandatory.
+activity_monitor:
+    # Define the activity monitor plugin to use. Valid plugins are
+    # 'gnome_dbus', 'wlroots', 'xlib_xinput', 'xlib_xss_xinput_mixed'
+    type: wlroots
+    # Configure the delay in seconds after which the user is considered
+    # idle. Defaults to 30 seconds.
+    #idle_delay: 30
+
+# Configure the light sensor. This section is optional. If omitted, 'none' is used.
+light_sensor:
+    # Define the light sensor plugin to use. Valid plugins are
+    # 'dbus_sensorproxy', 'none'
+    type: dbus_sensorproxy
+
+# Configure the keyboard backlight. This section is mandatory.
+keyboard_backlight:
+    # Define the keyboard backlight plugin to use. Valid plugins are
+    # 'dbus_upower', 'xbacklight'
+    type: xbacklight
+
+
+    # These options are common to all keyboard backlight plugins.
+    # Plugin-specific options are documented below.
+
+    # Define the lux values for minimum and maximum brightness of the backlight.
+    # At or below lux_for_min_brightness the minimum configured brightness will be set.
+    # At or above lux_for_max_brightness the maximum brightness of the control will be set.
+    # Between these values a linear interpolation will be applied.
+    # At or above lux_for_keyboard_off the backlight will be switched off.
+    # Default values are as follows:
+    #lux_for_min_brightness: 10
+    #lux_for_max_brightness: 300
+    #lux_for_keyboard_off: 400
+    
+    # Define the minimum brightness level for your backlight.
+    # This will be set when the detected light level is at or below
+    # lux_for_min_brightness.
+    # Default value is 10
+    #keyboard_min_brightness: 10
+
+
+    # The 'dbus_upower' plugin does not have any specific options.
+
+
+    # These options are specific to the 'xbacklight' plugin.
+
+    # Configure the control that should be manipulated by the plugin.
+    # Choose from the list given by the command `xbacklight -list`
+    control: chromeos::kbd_backlight
+    # Fade between lighting changes with this fps value
+    fade_fps: 30
+    # Fade time between lighting changes
+    fade_time: 300

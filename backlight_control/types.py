@@ -9,6 +9,10 @@ class ActivityMonitorBackend(StrEnum):
     XLIB_XSS_XINPUT_MIXED = "xlib_xss_xinput_mixed"
 
 
+class ConfigError(RuntimeError):
+    """Raised when invalid config is encountered."""
+
+
 class KeyboardBacklightBackend(StrEnum):
     DBUS_UPOWER = "dbus_upower"
     XBACKLIGHT = "xbacklight"

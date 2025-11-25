@@ -12,14 +12,17 @@ if TYPE_CHECKING:
 CONF_CONTROL = "control"
 CONF_FADE_FPS = "fade_fps"
 CONF_FADE_TIME = "fade_time"
+DEFAULT_CONTROL = "chromeos::kbd_backlight"
+DEFAULT_FADE_FPS = 30
+DEFAULT_FADE_TIME = 300
 
 _LOGGER = logging.getLogger(__name__)
 
 
 def get_plugin(hub: LightControlHub, config: dict):
-    config[CONF_CONTROL] = config.get(CONF_CONTROL) or "chromeos::kbd_backlight"
-    config[CONF_FADE_FPS] = config.get(CONF_FADE_FPS) or 30
-    config[CONF_FADE_TIME] = config.get(CONF_FADE_TIME) or 300
+    config[CONF_CONTROL] = config.get(CONF_CONTROL, DEFAULT_CONTROL)
+    config[CONF_FADE_FPS] = config.get(CONF_FADE_FPS, DEFAULT_FADE_FPS)
+    config[CONF_FADE_TIME] = config.get(CONF_FADE_TIME, DEFAULT_FADE_TIME)
     return XBacklightKeyboardBacklight(hub, config)
 
 

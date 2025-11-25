@@ -20,10 +20,10 @@ CONF_KEYBOARD_MIN_BRIGHTNESS = "keyboard_min_brightness"
 CONF_LUX_FOR_KEYBOARD_OFF = "lux_for_keyboard_off"
 CONF_LUX_FOR_MAX_BRIGHTNESS = "lux_for_max_brightness"
 CONF_LUX_FOR_MIN_BRIGHTNESS = "lux_for_min_brightness"
-KEYBOARD_MIN_BRIGHTNESS = 10
-LUX_FOR_KEYBOARD_OFF = 400
-LUX_FOR_MAX_BRIGHTNESS = 300
-LUX_FOR_MIN_BRIGHTNESS = 10
+DEFAULT_KEYBOARD_MIN_BRIGHTNESS = 10
+DEFAULT_LUX_FOR_KEYBOARD_OFF = 400
+DEFAULT_LUX_FOR_MAX_BRIGHTNESS = 300
+DEFAULT_LUX_FOR_MIN_BRIGHTNESS = 10
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -124,6 +124,7 @@ def get_and_verify_keyboard_backlight_plugin(
     except ImportError as e:
         raise ImportError(f"Failed to import keyboard backlight {backend.value}") from e
 
+    config = _parse_config(config)
     try:
         instance = module.get_plugin(hub, config)
     except AttributeError as e:
@@ -138,3 +139,16 @@ def get_and_verify_keyboard_backlight_plugin(
         )
 
     return instance
+
+
+def _parse_config(config: dict) -> dict:
+    """Make sure the config is complete."""
+    config[CONF_KEYBOARD_MIN_BRIGHTNESS] = config.get(
+        CONF_KEYBOARD_MIN_BRIGHTNESS, DEFAULT_KEYBOARD_MIN_BRIGHTNESS)
+    config[CONF_LUX_FOR_KEYBOARD_OFF] = config.get(
+        CONF_LUX_FOR_KEYBOARD_OFF, DEFAULT_LUX_FOR_KEYBOARD_OFF)
+    config[CONF_LUX_FOR_MAX_BRIGHTNESS] = config.get(
+        CONF_LUX_FOR_MAX_BRIGHTNESS, DEFAULT_LUX_FOR_MAX_BRIGHTNESS)
+    config[CONF_LUX_FOR_MIN_BRIGHTNESS] = config.get(
+        CONF_LUX_FOR_MIN_BRIGHTNESS, DEFAULT_LUX_FOR_MIN_BRIGHTNESS)
+    return config

@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 from Xlib.display import Display
 
-from ...activity_monitor import CONF_IDLE_DELAY, IDLE_DELAY, ActivityMonitor
+from ...activity_monitor import CONF_IDLE_DELAY, ActivityMonitor
 
 if TYPE_CHECKING:
     from Xlib.xobject.drawable import Window
@@ -18,8 +18,6 @@ _LOGGER = logging.getLogger(__name__)
 
 
 def get_plugin(hub: LightControlHub, config: dict):
-    if CONF_IDLE_DELAY not in config:
-        config[CONF_IDLE_DELAY] = IDLE_DELAY
     return XlibXssXinputMixedActivityMonitor(hub, config[CONF_IDLE_DELAY])
 
 
