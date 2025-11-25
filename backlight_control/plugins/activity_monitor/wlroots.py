@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import asyncio
-from concurrent.futures import ThreadPoolExecutor
 import logging
 from typing import TYPE_CHECKING
 
@@ -19,12 +18,12 @@ _LOGGER = logging.getLogger(__name__)
 def get_plugin(hub: LightControlHub, config: dict):
     if CONF_IDLE_DELAY not in config:
         config[CONF_IDLE_DELAY] = IDLE_DELAY
-    return WaylandActivityMonitor(hub, config)
+    return WlrootsActivityMonitor(hub, config)
 
 
 @wayland_class("ext_idle_notification_v1")
 class WaylandIdleNotification(wayland.ext_idle_notification_v1):
-    monitor: WaylandActivityMonitor = None
+    monitor: WlrootsActivityMonitor = None
 
     def on_idled(self):
         _LOGGER.debug("  Idle")
@@ -41,7 +40,7 @@ class WaylandInput(wayland.wl_registry):
     seats = []
     idler = None
     notifications = []
-    monitor: WaylandActivityMonitor = None
+    monitor: WlrootsActivityMonitor = None
 
     def on_global(self, name, interface, version):
         _LOGGER.debug(f"{interface} (version {version})")
@@ -69,7 +68,7 @@ class WaylandInput(wayland.wl_registry):
             _LOGGER.debug("...no we're not...")
 
 
-class WaylandActivityMonitor(ActivityMonitor):
+class WlrootsActivityMonitor(ActivityMonitor):
     _registry: wayland.wl_registry
     idle_queue = asyncio.Queue()
 
