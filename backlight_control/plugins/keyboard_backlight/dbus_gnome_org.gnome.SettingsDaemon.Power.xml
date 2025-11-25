@@ -1,0 +1,148 @@
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node>
+  <interface name="org.freedesktop.DBus.Properties">
+    <method name="Get">
+      <arg type="s" name="interface_name" direction="in"/>
+      <arg type="s" name="property_name" direction="in"/>
+      <arg type="v" name="value" direction="out"/>
+    </method>
+    <method name="GetAll">
+      <arg type="s" name="interface_name" direction="in"/>
+      <arg type="a{sv}" name="properties" direction="out"/>
+    </method>
+    <method name="Set">
+      <arg type="s" name="interface_name" direction="in"/>
+      <arg type="s" name="property_name" direction="in"/>
+      <arg type="v" name="value" direction="in"/>
+    </method>
+    <signal name="PropertiesChanged">
+      <arg type="s" name="interface_name"/>
+      <arg type="a{sv}" name="changed_properties"/>
+      <arg type="as" name="invalidated_properties"/>
+    </signal>
+  </interface>
+  <interface name="org.freedesktop.DBus.Introspectable">
+    <method name="Introspect">
+      <arg type="s" name="xml_data" direction="out"/>
+    </method>
+  </interface>
+  <interface name="org.freedesktop.DBus.Peer">
+    <method name="Ping"/>
+    <method name="GetMachineId">
+      <arg type="s" name="machine_uuid" direction="out"/>
+    </method>
+  </interface>
+  <interface name="org.gnome.SettingsDaemon.Power.Keyboard">
+    <method name="StepUp">
+      <arg type="i" name="new_percentage" direction="out">
+      </arg>
+    </method>
+    <method name="StepDown">
+      <arg type="i" name="new_percentage" direction="out">
+      </arg>
+    </method>
+    <method name="Toggle">
+      <arg type="i" name="new_percentage" direction="out">
+      </arg>
+    </method>
+    <signal name="BrightnessChanged">
+      <arg type="i" name="brightness">
+      </arg>
+      <arg type="s" name="source">
+      </arg>
+    </signal>
+    <property type="i" name="Brightness" access="readwrite">
+    </property>
+    <property type="i" name="Steps" access="read">
+    </property>
+  </interface>
+  <interface name="org.gtk.Actions">
+    <method name="List">
+      <arg type="as" name="list" direction="out">
+      </arg>
+    </method>
+    <method name="Describe">
+      <arg type="s" name="action_name" direction="in">
+      </arg>
+      <arg type="(bgav)" name="description" direction="out">
+      </arg>
+    </method>
+    <method name="DescribeAll">
+      <arg type="a{s(bgav)}" name="descriptions" direction="out">
+      </arg>
+    </method>
+    <method name="Activate">
+      <arg type="s" name="action_name" direction="in">
+      </arg>
+      <arg type="av" name="parameter" direction="in">
+      </arg>
+      <arg type="a{sv}" name="platform_data" direction="in">
+      </arg>
+    </method>
+    <method name="SetState">
+      <arg type="s" name="action_name" direction="in">
+      </arg>
+      <arg type="v" name="value" direction="in">
+      </arg>
+      <arg type="a{sv}" name="platform_data" direction="in">
+      </arg>
+    </method>
+    <signal name="Changed">
+      <arg type="as" name="removals">
+      </arg>
+      <arg type="a{sb}" name="enable_changes">
+      </arg>
+      <arg type="a{sv}" name="state_changes">
+      </arg>
+      <arg type="a{s(bgav)}" name="additions">
+      </arg>
+    </signal>
+  </interface>
+  <interface name="org.gtk.Application">
+    <method name="Activate">
+      <arg type="a{sv}" name="platform-data" direction="in">
+      </arg>
+    </method>
+    <method name="Open">
+      <arg type="as" name="uris" direction="in">
+      </arg>
+      <arg type="s" name="hint" direction="in">
+      </arg>
+      <arg type="a{sv}" name="platform-data" direction="in">
+      </arg>
+    </method>
+    <method name="CommandLine">
+      <arg type="o" name="path" direction="in">
+      </arg>
+      <arg type="aay" name="arguments" direction="in">
+      </arg>
+      <arg type="a{sv}" name="platform-data" direction="in">
+      </arg>
+      <arg type="i" name="exit-status" direction="out">
+      </arg>
+    </method>
+    <property type="b" name="Busy" access="read">
+    </property>
+  </interface>
+  <interface name="org.freedesktop.Application">
+    <method name="Activate">
+      <arg type="a{sv}" name="platform-data" direction="in">
+      </arg>
+    </method>
+    <method name="Open">
+      <arg type="as" name="uris" direction="in">
+      </arg>
+      <arg type="a{sv}" name="platform-data" direction="in">
+      </arg>
+    </method>
+    <method name="ActivateAction">
+      <arg type="s" name="action-name" direction="in">
+      </arg>
+      <arg type="av" name="parameter" direction="in">
+      </arg>
+      <arg type="a{sv}" name="platform-data" direction="in">
+      </arg>
+    </method>
+  </interface>
+</node>

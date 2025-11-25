@@ -14,6 +14,7 @@ class ConfigError(RuntimeError):
 
 
 class KeyboardBacklightBackend(StrEnum):
+    DBUS_GNOME = "dbus_gnome"
     DBUS_UPOWER = "dbus_upower"
     XBACKLIGHT = "xbacklight"
 

@@ -19,7 +19,7 @@ light_sensor:
 # Configure the keyboard backlight. This section is mandatory.
 keyboard_backlight:
     # Define the keyboard backlight plugin to use. Valid plugins are
-    # 'dbus_upower', 'xbacklight'
+    # 'dbus_gnome', 'dbus_upower', 'xbacklight'
     type: xbacklight
 
 
@@ -41,6 +41,9 @@ keyboard_backlight:
     # lux_for_min_brightness.
     # Default value is 10
     #keyboard_min_brightness: 10
+
+
+    # The 'dbus_gnome' plugin does not have any specific options.
 
 
     # The 'dbus_upower' plugin does not have any specific options.
