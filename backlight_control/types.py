@@ -21,7 +21,7 @@ class KeyboardBacklightOperatingMode(StrEnum):
 
 class LightSensorBackend(StrEnum):
     DBUS_SENSORPROXY = "dbus_sensorproxy"
-
+    NONE = "none"
 
 @dataclass(kw_only=True)
 class LightControlHubActivityUpdate:
