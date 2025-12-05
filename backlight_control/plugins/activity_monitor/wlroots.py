@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from contextlib import suppress
+from queue import Queue
+from threading import Event
 from typing import TYPE_CHECKING
 
 import wayland
@@ -20,7 +23,7 @@ def get_plugin(hub: LightControlHub, config: dict):
 
 
 @wayland_class("ext_idle_notification_v1")
-class WaylandIdleNotification(wayland.ext_idle_notification_v1):
+class WlrootsIdleNotification(wayland.ext_idle_notification_v1):
     monitor: WlrootsActivityMonitor = None
 
     def on_idled(self):
@@ -33,12 +36,21 @@ class WaylandIdleNotification(wayland.ext_idle_notification_v1):
 
 
 @wayland_class("wl_registry")
-class WaylandInput(wayland.wl_registry):
+class WlrootsInput(wayland.wl_registry):
 
-    seats = []
-    idler = None
-    notifications = []
-    monitor: WlrootsActivityMonitor = None
+    idler: wayland.ext_idle_notifier_v1 | None
+    monitor: WlrootsActivityMonitor | None
+    notifications: list[WlrootsIdleNotification]
+    seats: list[wayland.wl_seat]
+    
+
+    def __init__(self):
+        """Initialize values"""
+        super().__init__()
+        self.seats = []
+        self.idler = None
+        self.notifications = []
+        self.monitor = None
 
     def on_global(self, name, interface, version):
         _LOGGER.debug(f"{interface} (version {version})")
@@ -67,35 +79,46 @@ class WaylandInput(wayland.wl_registry):
 
 
 class WlrootsActivityMonitor(ActivityMonitor):
-    _registry: wayland.wl_registry
-    idle_queue = asyncio.Queue()
+    _worker: asyncio.Future | None
+    _messageprocessor: asyncio.Task | None
+    _stop_event: Event
 
     def __init__(self, hub: LightControlHub, config: dict) -> None:
+        self.idle_queue = Queue()
         self._hub: LightControlHub = hub
         self._config: dict = config
+        self._worker = None
+        self._messageprocessor = None
+        self._stop_event = Event()
 
     @property
     def config(self) -> dict:
         return self._config
 
     async def start(self) -> None:
-        self.loop = asyncio.get_running_loop()
+        loop = asyncio.get_running_loop()
+        self._worker = loop.run_in_executor(None, self._monitor, self._stop_event)
+        self._messageprocessor = loop.create_task(self._process())
+    
+    def stop(self) -> None:
+        self._stop_event.set()
+
+    def _monitor(self, stopping: Event) -> None:
         display = wayland.wl_display()
-        self._registry = display.get_registry()
-        self._registry.monitor = self
+        registry = display.get_registry()
+        registry.monitor = self
 
-        self._worker = self.loop.create_task(self._monitor(display))
-        self._messageprocessor = self.loop.create_task(self._process())
-
-    async def _monitor(self, display) -> None:
         while True:
             display.dispatch_timeout(0.1)
-            await asyncio.sleep(0.1)
+            if stopping.is_set():
+                return
     
     async def _process(self):
         while True:
             _LOGGER.debug("Waiting for idle events")
-            state = await self.idle_queue.get()
+            while self.idle_queue.empty():
+                await asyncio.sleep(0.1)
+            state = self.idle_queue.get()
             _LOGGER.debug(f"Got event: {state}")
             if state:
                 await self.trigger_idle()

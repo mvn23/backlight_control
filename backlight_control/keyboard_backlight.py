@@ -105,6 +105,9 @@ class KeyboardBacklight(ABC):
     @abstractmethod
     async def start(self) -> None:
         raise NotImplementedError
+    
+    def stop(self) -> None:
+        return
 
     async def update_stored(self) -> int:
         self.stored = await self.get_current()

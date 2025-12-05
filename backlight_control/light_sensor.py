@@ -30,6 +30,9 @@ class LightSensor(ABC):
     @abstractmethod
     async def resume(self) -> None:
         raise NotImplementedError
+    
+    def stop(self) -> None:
+        return
 
 
 class _DummyLightSensor(LightSensor):
