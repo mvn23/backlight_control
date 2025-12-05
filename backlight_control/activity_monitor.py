@@ -36,6 +36,9 @@ class ActivityMonitor(ABC):
     async def start(self) -> None:
         raise NotImplementedError
 
+    def stop(self) -> None:
+        return
+
     async def trigger_idle(self) -> None:
         self._is_idle = True
         await self._hub.activity_update(LightControlHubActivityUpdate(is_idle=True))
