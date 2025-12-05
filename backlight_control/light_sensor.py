@@ -14,7 +14,6 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class LightSensor(ABC):
-
     @abstractmethod
     def __init__(self, hub: LightControlHub, config: dict) -> None:
         raise NotImplementedError
@@ -30,7 +29,7 @@ class LightSensor(ABC):
     @abstractmethod
     async def resume(self) -> None:
         raise NotImplementedError
-    
+
     def stop(self) -> None:
         return
 

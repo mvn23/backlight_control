@@ -52,9 +52,7 @@ class DBusGnomeKeyboardBacklight(KeyboardBacklight):
         self._bus = await MessageBus(bus_type=BusType.SESSION).connect()
 
         with open(
-            os.path.join(
-                _MODULE_DIR, "dbus_gnome_org.gnome.SettingsDaemon.Power.xml"
-            ),
+            os.path.join(_MODULE_DIR, "dbus_gnome_org.gnome.SettingsDaemon.Power.xml"),
         ) as f:
             node_introspection = f.read()
 

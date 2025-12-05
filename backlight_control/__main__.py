@@ -7,20 +7,23 @@ import yaml
 
 from .hub import LightControlHub
 
-CONF_LOG_LEVEL = 'log_level'
+CONF_LOG_LEVEL = "log_level"
 
 
 async def main_coro(config):
     logging.basicConfig(
-        level=getattr(logging, config.get(CONF_LOG_LEVEL, ""), logging.INFO))
+        level=getattr(logging, config.get(CONF_LOG_LEVEL, ""), logging.INFO)
+    )
     mon = LightControlHub(config)
     try:
         await mon.start()
     except asyncio.CancelledError:
         mon.stop()
 
+
 def print_usage():
     print(f"Usage: {sys.argv[0]} <config_file>")
+
 
 def main():
     if len(sys.argv) != 2:

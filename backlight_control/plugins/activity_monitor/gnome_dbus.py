@@ -24,7 +24,6 @@ def get_plugin(hub: LightControlHub, config: dict) -> ActivityMonitor:
 
 
 class GnomeDBusActivityMonitor(ActivityMonitor):
-
     _active_watch: Optional(int) = None
     _bus: MessageBus
     _idle_tasks: set = set()
@@ -58,7 +57,8 @@ class GnomeDBusActivityMonitor(ActivityMonitor):
             "org.gnome.Mutter.IdleMonitor",
         )
         self._idle_watch = await self._idle_monitor.call_add_idle_watch(
-            self._config[CONF_IDLE_DELAY])
+            self._config[CONF_IDLE_DELAY]
+        )
         self._idle_monitor.on_watch_fired(self._watch_fired)
 
     def _watch_fired(self, id: int) -> None:
@@ -66,7 +66,8 @@ class GnomeDBusActivityMonitor(ActivityMonitor):
         if id == self._idle_watch:
             _LOGGER.debug("Entering Idle...")
             self._active_watch = asyncio.create_task(
-                self._idle_monitor.call_add_user_active_watch())
+                self._idle_monitor.call_add_user_active_watch()
+            )
             self._add_idle_task(self.trigger_idle())
         elif id == self._active_watch.result():
             _LOGGER.debug("Back in action!")

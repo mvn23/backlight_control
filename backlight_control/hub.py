@@ -28,7 +28,8 @@ class LightControlHub:
 
         self._activity_monitor = self._get_activity_monitor_plugin_from_config(config)
         self._keyboard_backlight = self._get_keyboard_backlight_plugin_from_config(
-            config)
+            config
+        )
         self._light_sensor = self._get_light_sensor_plugin_from_config(config)
 
     async def start(self) -> None:
@@ -61,7 +62,6 @@ class LightControlHub:
         _LOGGER.debug("Got light sensor update: %s", update)
         await self._keyboard_backlight.on_lighting_event(update)
 
-
     def _get_activity_monitor_plugin_from_config(
         self,
         config: dict,
@@ -70,7 +70,9 @@ class LightControlHub:
         try:
             plugin = ActivityMonitorBackend(config[CONF_ACTIVITY_MONITOR][CONF_TYPE])
         except ValueError as e:
-            raise ConfigError("No valid activity_monitor plugin defined in config.") from e
+            raise ConfigError(
+                "No valid activity_monitor plugin defined in config."
+            ) from e
 
         _LOGGER.debug(f"Using activity_monitor plugin {plugin.value}")
         return get_and_verify_activity_plugin(
@@ -79,17 +81,19 @@ class LightControlHub:
             config[CONF_ACTIVITY_MONITOR],
         )
 
-
     def _get_keyboard_backlight_plugin_from_config(
         self,
         config: dict,
     ) -> KeyboardBacklightBackend:
         """Return KeyboardBacklightBackend from config."""
         try:
-            plugin = KeyboardBacklightBackend(config[CONF_KEYBOARD_BACKLIGHT][CONF_TYPE])
+            plugin = KeyboardBacklightBackend(
+                config[CONF_KEYBOARD_BACKLIGHT][CONF_TYPE]
+            )
         except ValueError as e:
             raise ConfigError(
-                "No valid keyboard_backlight plugin defined in config.") from e
+                "No valid keyboard_backlight plugin defined in config."
+            ) from e
 
         _LOGGER.debug(f"Using keyboard_backlight plugin {plugin.value}")
         return get_and_verify_keyboard_backlight_plugin(
@@ -98,7 +102,6 @@ class LightControlHub:
             config[CONF_KEYBOARD_BACKLIGHT],
         )
 
-
     def _get_light_sensor_plugin_from_config(
         self,
         config: dict,
@@ -106,11 +109,7 @@ class LightControlHub:
         """Return LightSensorBackend from config."""
         if config.get(CONF_LIGHT_SENSOR) is None:
             _LOGGER.info("No light sensor defined in config, falling back to none.")
-            return get_and_verify_light_sensor_plugin(
-                LightSensorBackend.NONE,
-                self,
-                {}
-            )
+            return get_and_verify_light_sensor_plugin(LightSensorBackend.NONE, self, {})
         try:
             plugin = LightSensorBackend(config[CONF_LIGHT_SENSOR][CONF_TYPE])
         except ValueError as e:

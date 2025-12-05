@@ -29,7 +29,6 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class KeyboardBacklight(ABC):
-
     stored: int = 0
     _config: dict
 
@@ -105,7 +104,7 @@ class KeyboardBacklight(ABC):
     @abstractmethod
     async def start(self) -> None:
         raise NotImplementedError
-    
+
     def stop(self) -> None:
         return
 
@@ -147,11 +146,15 @@ def get_and_verify_keyboard_backlight_plugin(
 def _parse_config(config: dict) -> dict:
     """Make sure the config is complete."""
     config[CONF_KEYBOARD_MIN_BRIGHTNESS] = config.get(
-        CONF_KEYBOARD_MIN_BRIGHTNESS, DEFAULT_KEYBOARD_MIN_BRIGHTNESS)
+        CONF_KEYBOARD_MIN_BRIGHTNESS, DEFAULT_KEYBOARD_MIN_BRIGHTNESS
+    )
     config[CONF_LUX_FOR_KEYBOARD_OFF] = config.get(
-        CONF_LUX_FOR_KEYBOARD_OFF, DEFAULT_LUX_FOR_KEYBOARD_OFF)
+        CONF_LUX_FOR_KEYBOARD_OFF, DEFAULT_LUX_FOR_KEYBOARD_OFF
+    )
     config[CONF_LUX_FOR_MAX_BRIGHTNESS] = config.get(
-        CONF_LUX_FOR_MAX_BRIGHTNESS, DEFAULT_LUX_FOR_MAX_BRIGHTNESS)
+        CONF_LUX_FOR_MAX_BRIGHTNESS, DEFAULT_LUX_FOR_MAX_BRIGHTNESS
+    )
     config[CONF_LUX_FOR_MIN_BRIGHTNESS] = config.get(
-        CONF_LUX_FOR_MIN_BRIGHTNESS, DEFAULT_LUX_FOR_MIN_BRIGHTNESS)
+        CONF_LUX_FOR_MIN_BRIGHTNESS, DEFAULT_LUX_FOR_MIN_BRIGHTNESS
+    )
     return config

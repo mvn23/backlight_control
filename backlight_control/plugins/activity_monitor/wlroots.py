@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from contextlib import suppress
 from queue import Queue
 from threading import Event
 from typing import TYPE_CHECKING
@@ -37,12 +36,10 @@ class WlrootsIdleNotification(wayland.ext_idle_notification_v1):
 
 @wayland_class("wl_registry")
 class WlrootsInput(wayland.wl_registry):
-
     idler: wayland.ext_idle_notifier_v1 | None
     monitor: WlrootsActivityMonitor | None
     notifications: list[WlrootsIdleNotification]
     seats: list[wayland.wl_seat]
-    
 
     def __init__(self):
         """Initialize values"""
@@ -63,15 +60,15 @@ class WlrootsInput(wayland.wl_registry):
             self.maybe_subscribe()
         else:
             return  # ignore all other interfaces
-    
+
     def maybe_subscribe(self):
         _LOGGER.debug("Checking if we are ready to subscribe...")
         if self.seats and self.idler:
             _LOGGER.debug("...yes we are!")
             for seat in self.seats:
                 notification = self.idler.get_input_idle_notification(
-                        self.monitor.config[CONF_IDLE_DELAY] * 1000, seat
-                    )
+                    self.monitor.config[CONF_IDLE_DELAY] * 1000, seat
+                )
                 notification.monitor = self.monitor
                 self.notifications.append(notification)
         else:
@@ -99,7 +96,7 @@ class WlrootsActivityMonitor(ActivityMonitor):
         loop = asyncio.get_running_loop()
         self._worker = loop.run_in_executor(None, self._monitor, self._stop_event)
         self._messageprocessor = loop.create_task(self._process())
-    
+
     def stop(self) -> None:
         self._stop_event.set()
 
@@ -112,7 +109,7 @@ class WlrootsActivityMonitor(ActivityMonitor):
             display.dispatch_timeout(0.1)
             if stopping.is_set():
                 return
-    
+
     async def _process(self):
         while True:
             _LOGGER.debug("Waiting for idle events")
