@@ -49,7 +49,7 @@ class XlibXinputActivityMonitor(ActivityMonitor):
         )
 
         self._root = display.screen().root
-        self._root.xinput_select_events(
+        self._root.xinput_select_events(  # type: ignore[attr-defined]
             [
                 (
                     xinput.AllDevices,

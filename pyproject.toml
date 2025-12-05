@@ -45,6 +45,9 @@ known-first-party = [
 combine-as-imports = true
 split-on-trailing-comma = false
 
+[[tool.mypy.overrides]]
+module = ["wayland.*"]
+ignore_missing_imports = true
 
 [tool.setuptools.package-data]
 "*" = ["*.xml"]

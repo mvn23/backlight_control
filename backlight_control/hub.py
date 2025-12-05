@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import asyncio
 import logging
+from typing import TYPE_CHECKING
 
 from .activity_monitor import get_and_verify_activity_plugin
 from .keyboard_backlight import get_and_verify_keyboard_backlight_plugin
@@ -14,6 +17,12 @@ from .types import (
     LightSensorBackend,
 )
 
+if TYPE_CHECKING:
+    from .activity_monitor import ActivityMonitor
+    from .keyboard_backlight import KeyboardBacklight
+    from .light_sensor import LightSensor
+
+
 CONF_ACTIVITY_MONITOR = "activity_monitor"
 CONF_KEYBOARD_BACKLIGHT = "keyboard_backlight"
 CONF_LIGHT_SENSOR = "light_sensor"
@@ -23,7 +32,9 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class LightControlHub:
-    def __init__(self, config) -> None:
+    """backlight_control coordinator hub"""
+
+    def __init__(self, config: dict) -> None:
         self.stopping = asyncio.Event()
 
         self._activity_monitor = self._get_activity_monitor_plugin_from_config(config)
@@ -65,8 +76,8 @@ class LightControlHub:
     def _get_activity_monitor_plugin_from_config(
         self,
         config: dict,
-    ) -> ActivityMonitorBackend:
-        """Return ActivityMonitorBackend from config."""
+    ) -> ActivityMonitor:
+        """Return ActivityMonitor from config."""
         try:
             plugin = ActivityMonitorBackend(config[CONF_ACTIVITY_MONITOR][CONF_TYPE])
         except ValueError as e:
@@ -74,7 +85,7 @@ class LightControlHub:
                 "No valid activity_monitor plugin defined in config."
             ) from e
 
-        _LOGGER.debug(f"Using activity_monitor plugin {plugin.value}")
+        _LOGGER.debug("Using activity_monitor plugin %s", plugin.value)
         return get_and_verify_activity_plugin(
             plugin,
             self,
@@ -84,8 +95,8 @@ class LightControlHub:
     def _get_keyboard_backlight_plugin_from_config(
         self,
         config: dict,
-    ) -> KeyboardBacklightBackend:
-        """Return KeyboardBacklightBackend from config."""
+    ) -> KeyboardBacklight:
+        """Return KeyboardBacklight from config."""
         try:
             plugin = KeyboardBacklightBackend(
                 config[CONF_KEYBOARD_BACKLIGHT][CONF_TYPE]
@@ -95,7 +106,7 @@ class LightControlHub:
                 "No valid keyboard_backlight plugin defined in config."
             ) from e
 
-        _LOGGER.debug(f"Using keyboard_backlight plugin {plugin.value}")
+        _LOGGER.debug("Using keyboard_backlight plugin %s", plugin.value)
         return get_and_verify_keyboard_backlight_plugin(
             plugin,
             self,
@@ -105,8 +116,8 @@ class LightControlHub:
     def _get_light_sensor_plugin_from_config(
         self,
         config: dict,
-    ) -> LightSensorBackend:
-        """Return LightSensorBackend from config."""
+    ) -> LightSensor:
+        """Return LightSensor from config."""
         if config.get(CONF_LIGHT_SENSOR) is None:
             _LOGGER.info("No light sensor defined in config, falling back to none.")
             return get_and_verify_light_sensor_plugin(LightSensorBackend.NONE, self, {})
@@ -115,7 +126,7 @@ class LightControlHub:
         except ValueError as e:
             raise ConfigError("No valid light_sensor plugin defined in config.") from e
 
-        _LOGGER.debug(f"Using light_sensor plugin {plugin.value}")
+        _LOGGER.debug("Using light_sensor plugin %s", plugin.value)
         return get_and_verify_light_sensor_plugin(
             plugin,
             self,

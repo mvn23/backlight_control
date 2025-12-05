@@ -23,7 +23,7 @@ def get_plugin(hub: LightControlHub, config: dict):
 
 @wayland_class("ext_idle_notification_v1")
 class WlrootsIdleNotification(wayland.ext_idle_notification_v1):
-    monitor: WlrootsActivityMonitor = None
+    monitor: WlrootsActivityMonitor | None = None
 
     def on_idled(self):
         _LOGGER.debug("  Idle")
@@ -50,7 +50,7 @@ class WlrootsInput(wayland.wl_registry):
         self.monitor = None
 
     def on_global(self, name, interface, version):
-        _LOGGER.debug(f"{interface} (version {version})")
+        _LOGGER.debug("%s (version %s)", interface, version)
         if interface == "wl_seat":
             seat = self.bind(name, interface, version)
             self.seats.append(seat)
@@ -81,7 +81,7 @@ class WlrootsActivityMonitor(ActivityMonitor):
     _stop_event: Event
 
     def __init__(self, hub: LightControlHub, config: dict) -> None:
-        self.idle_queue = Queue()
+        self.idle_queue: Queue = Queue()
         self._hub: LightControlHub = hub
         self._config: dict = config
         self._worker = None
@@ -116,7 +116,7 @@ class WlrootsActivityMonitor(ActivityMonitor):
             while self.idle_queue.empty():
                 await asyncio.sleep(0.1)
             state = self.idle_queue.get()
-            _LOGGER.debug(f"Got event: {state}")
+            _LOGGER.debug("Got event: %s", state)
             if state:
                 await self.trigger_idle()
             else:
