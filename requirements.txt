@@ -1,6 +1,9 @@
 dbus-fast
+pre-commit
 pytest-asyncio
 pytest-cov
 python-wayland
 python-xlib
+pyyaml
 types-python-xlib
+types-PyYAML

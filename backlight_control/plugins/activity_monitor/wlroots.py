@@ -36,13 +36,14 @@ class WlrootsIdleNotification(wayland.ext_idle_notification_v1):
 
 @wayland_class("wl_registry")
 class WlrootsInput(wayland.wl_registry):
+    """Wayland global registry"""
+
     idler: wayland.ext_idle_notifier_v1 | None
     monitor: WlrootsActivityMonitor | None
     notifications: list[WlrootsIdleNotification]
     seats: list[wayland.wl_seat]
 
     def __init__(self):
-        """Initialize values"""
         super().__init__()
         self.seats = []
         self.idler = None
